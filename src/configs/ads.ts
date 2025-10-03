@@ -1,4 +1,5 @@
-// src/config/ads.ts
+// src/configs/ads.ts
+import {Platform} from 'react-native';
 import mobileAds, {
   MaxAdContentRating,
   AppOpenAd,
@@ -6,12 +7,28 @@ import mobileAds, {
   RequestOptions,
 } from 'react-native-google-mobile-ads';
 
-export const AdUnitIds = {
-  rewarded:     'ca-app-pub-9439925710580612/4787122277',
+// Android ve iOS için ayrı reklam birimleri.
+// Android değerleri mevcut; iOS değerlerini sağladıktan sonra aşağıya yerleştireceğiz.
+const ANDROID_UNITS = {
+  rewarded: 'ca-app-pub-9439925710580612/4787122277',
   interstitial: 'ca-app-pub-9439925710580612/4100726566',
-  banner:       'ca-app-pub-9439925710580612/2194965569',
-  appOpen:      'ca-app-pub-9439925710580612/3114947957',
+  banner: 'ca-app-pub-9439925710580612/2194965569',
+  appOpen: 'ca-app-pub-9439925710580612/3114947957',
 };
+
+const IOS_UNITS = {
+  // Aşağıdaki placeholder'ları iOS reklam birimi ID'leri ile değiştireceğiz
+  rewarded: 'ca-app-pub-3940256099942544/1712485313', // TEST Rewarded
+  interstitial: 'ca-app-pub-3940256099942544/1033173712', // TEST Interstitial
+  banner: 'ca-app-pub-3940256099942544/2934735716', // TEST Banner
+  appOpen: 'ca-app-pub-3940256099942544/5662855259', // TEST App Open
+};
+
+export const AdUnitIds = Platform.select({
+  ios: IOS_UNITS,
+  android: ANDROID_UNITS,
+  default: ANDROID_UNITS,
+});
 
 export async function initAds(cfg?: Partial<RequestOptions>) {
   await mobileAds().setRequestConfiguration({
