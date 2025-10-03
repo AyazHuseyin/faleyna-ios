@@ -16,10 +16,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node (20.x)
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Select Xcode 16.1
         uses: maxim-lobanov/setup-xcode@v1
@@ -36,10 +36,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-rn-
 
-      - name: Install JS deps
+      - name: Install JS deps (Node 20)
         run: npm ci
 
-      - name: Install CocoaPods
+      - name: Install CocoaPods and Pod install
         run: |
           sudo gem install cocoapods --no-document
           cd ios && pod install --repo-update
