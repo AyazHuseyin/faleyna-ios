@@ -1,0 +1,61 @@
+name: iOS CI (Build for Simulator)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ios/Pods
+          key: ${{ runner.os }}-rn-${{ hashFiles('package-lock.json', 'ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rn-
+
+      - name: Install JS deps
+        run: npm ci
+
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods --no-document
+          cd ios && pod install --repo-update
+
+      - name: Xcode build (simulator)
+        run: |
+          xcodebuild -workspace ios/faleyna.xcworkspace \
+            -scheme faleyna \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            build | xcpretty
+        env:
+          RCT_NO_LAUNCH_PACKAGER: '1'
+
+      - name: Archive artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-logs
+          path: |
+            ~/Library/Logs/scan
+            ~/Library/Logs/gym
+            ~/Library/Logs/xcodebuild
